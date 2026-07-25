@@ -16,7 +16,7 @@ def Softmax(x):
     return np.exp(x)/np.sum(np.exp(x))
 
 A=input("Enter Sigmoid or Tanh or relu or Softmax: ")
-if A=="Sigmoid":
+if A=="Sigmoid" or A=="sigmoid":
     sigmoid=Sigmoid(z)
     plt.plot(z,sigmoid)
     plt.xlabel("z")
@@ -24,7 +24,10 @@ if A=="Sigmoid":
     plt.title("Sigmoid_curve")
     plt.grid(True)
     plt.show()
-elif A=="Tanh":
+    print("The min is -1 & max is 1")
+    print('Tanh is not zero centered')
+    print('if the input is very small the sigmoid function returns 0.5 \n if the input is very large it returns 1')
+elif A=="Tanh" or A=="tanh":
     Tanh=tanh(z)
     plt.plot(z,Tanh)
     plt.xlabel("z")
@@ -44,7 +47,7 @@ elif A=="relu":
     plt.show()
     print("The min is 0 & max is 9.8")
     print('ReLU is zero centered')
-elif A=="Softmax":
+elif A=="Softmax" or A=="softmax":
     softmax=Softmax(z)
     plt.plot(z,softmax)
     plt.xlabel("z")
@@ -56,3 +59,13 @@ elif A=="Softmax":
     print('ReLU is zero centered')
 else:
     print("Invalid input")
+
+a=[0.0000001,0.000001,0.00001]
+print(tanh(a))
+print(relu(a))
+print(Softmax(a))
+print("============================")
+b=[1000000,1000000,1000000]
+print(tanh(b))
+print(relu(b))
+print(Softmax(b))
