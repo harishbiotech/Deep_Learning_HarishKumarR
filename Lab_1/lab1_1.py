@@ -60,12 +60,15 @@ elif A=="Softmax" or A=="softmax":
 else:
     print("Invalid input")
 
+
+
+print("=============================")
 a=[0.0000001,0.000001,0.00001]
 print(tanh(a))
 print(relu(a))
 print(Softmax(a))
 print("============================")
-b=[1000000,1000000,1000000]
+b=[10,100,1000]
 print(tanh(b))
 print(relu(b))
 print(Softmax(b))
