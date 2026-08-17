@@ -164,3 +164,4 @@ df_W4=sp.diff(d, W4)
 print('df_W4',df_W4)
 value_df_X4=df_X4.subs(W4,0.4)
 print('value_df_X4',value_df_X4*glo8)
+

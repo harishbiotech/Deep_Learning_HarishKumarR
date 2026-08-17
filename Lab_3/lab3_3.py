@@ -6,7 +6,7 @@ from torchvision.transforms import v2
 
 # define neural network
 class NeuralNetwork(nn.Module):
-        def __init__(self):
+    def __init__(self):
         super(NeuralNetwork, self).__init__()
         self.flatten = nn.Flatten()
         self.linear1 = nn.Linear(in_features=28*28, out_features=512)
@@ -24,10 +24,6 @@ class NeuralNetwork(nn.Module):
         logits = self.linear3(x)
         out = logits
         return out
-
-
-
-
 
 def load_data():
     # download train dataset
