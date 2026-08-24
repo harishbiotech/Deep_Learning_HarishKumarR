@@ -1,45 +1,76 @@
 import numpy as np
-X=[[0,0,1],
-   [1,1,1],
-   [1,0,1],
-   [0,1,1]]
 
-Y=[0,
-   1,
-   1,
-   0]
-weight=[0.1,
-        0.1,
-        0.1]
+X = [[0, 0, 1],
+     [1, 1, 1],
+     [1, 0, 1],
+     [0, 1, 1]]
 
-print("weight => ",weight)
+Y = [0,
+     1,
+     1,
+     0]
+
+weight = [0.1,
+          0.1,
+          0.1]
+
+print("Weight =>", weight)
 
 def sigmoid(z):
-   return 1/(1+np.exp(-z))
+    return 1 / (1 + np.exp(-z))
 
-alpha=float(input("Enter alpha : "))
 
-dot=np.dot(X,weight)
-print("Weight * X value => ",dot)
+alpha = float(input("Enter alpha: "))
 
-Y_cap=[]
+# dot = np.dot(X, weight)
+#
+# print("Weight * X value =>", dot)
+#
+# Y_cap = []
+#
+# for i in range(len(dot)):
+#     Y_cap.append(sigmoid(dot[i]))
+#
+# print("Predicted Y_cap =>", Y_cap)
+#
+#
+# L = []
+#
+# for i in range(len(Y_cap)):
+#     loss = -1 * (Y[i] * np.log(Y_cap[i])+ (1 - Y[i]) * np.log(1 - Y_cap[i]))
+#
+#     L.append(loss)
+#
+# print("Loss =>", L)
 
-for i in range(0,len(dot)):
-   Y_cap.append(sigmoid(dot[i]))
-print("Predicted Y_cap => ",Y_cap)
 
-L=[]
+for t in range(1001):
 
-for i in range(0,len(Y_cap)):
-   L.append(-1*(Y[i]*np.log(Y_cap[i])+(1-Y[i])*np.log(1-Y_cap[i])))
+    print("=======================")
+    print("Number of iteration:", t)
 
-print("Loss => ",L)
+    dot = np.dot(X, weight)
+    Y_cap = []
 
-updated_weight=[]
-s=[]
-for i in range(0,len(X[0])):
-   for j in range(0,len(Y_cap)):
-      s.append((Y_cap[j]-Y[j])*X[i][j])
-   updated_weight.append(weight[i]-alpha*(s[i]))
+    for i in range(len(dot)):
+        Y_cap.append(sigmoid(dot[i]))
+    print("Predicted Y_cap =>", Y_cap)
 
-print("Updated weight => ",updated_weight)
+    L = []
+    for i in range(len(Y_cap)):
+        loss = -1 * (Y[i] * np.log(Y_cap[i])+ (1 - Y[i]) * np.log(1 - Y_cap[i]))
+        L.append(loss)
+    print("Loss =>", L)
+
+    updated_weight = []
+
+    for i in range(len(weight)):
+        s = 0
+        for j in range(len(Y_cap)):
+            s += (Y_cap[j] - Y[j]) * X[j][i]
+        new_weight = weight[i] - alpha * s
+        updated_weight.append(new_weight)
+
+    weight = updated_weight
+
+    print("Updated weight =>", weight)
