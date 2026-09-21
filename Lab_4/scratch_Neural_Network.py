@@ -4,45 +4,12 @@ X = [[0, 0, 1],
      [1, 1, 1],
      [1, 0, 1],
      [0, 1, 1]]
-
-Y = [0,
-     1,
-     1,
-     0]
-
-weight = [0.1,
-          0.1,
-          0.1]
-
+Y = [0,1,1,0]
+weight = [0.1,0.1,0.1]
 print("Weight =>", weight)
-
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
-
-
 alpha = float(input("Enter alpha: "))
-
-# dot = np.dot(X, weight)
-#
-# print("Weight * X value =>", dot)
-#
-# Y_cap = []
-#
-# for i in range(len(dot)):
-#     Y_cap.append(sigmoid(dot[i]))
-#
-# print("Predicted Y_cap =>", Y_cap)
-#
-#
-# L = []
-#
-# for i in range(len(Y_cap)):
-#     loss = -1 * (Y[i] * np.log(Y_cap[i])+ (1 - Y[i]) * np.log(1 - Y_cap[i]))
-#
-#     L.append(loss)
-#
-# print("Loss =>", L)
-
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 for t in range(1001):
 
