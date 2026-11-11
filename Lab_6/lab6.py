@@ -1,51 +1,120 @@
 import torch
+from torch import nn
+from torch.utils.data import DataLoader
+from torchvision import datasets
+from torchvision.transforms import v2
 
-X = [[0, 0],
-     [0, 1],
-     [1, 0],
-     [1, 1]]
-Y = [[0], [1], [1], [0]]
-X_tensor = torch.tensor(X)
-X_tensor_float = X_tensor.float()
-Y_tensor = torch.tensor(Y,dtype=torch.float)
-# print(X_tensor)
-# print(X_tensor.dtype)
-# print(X_tensor.shape)
-# print(X_tensor_float)
-# print(X_tensor_float.dtype)
-# print(Y_tensor)
-# print(Y_tensor.dtype)
-# print(Y_tensor.shape)
+# Download training data from open datasets.
+training_data = datasets.FashionMNIST(
+    root="/home/ibab/Deep_Learning_HarishKumarR/Lab_6/data",
+    train=True,
+    download=True,
+    transform=v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]),
+)
 
-#============ gradient ==============
+# Download test data from open datasets.
+test_data = datasets.FashionMNIST(
+    root="/home/ibab/Deep_Learning_HarishKumarR/Lab_6/data",
+    train=False,
+    download=True,
+    transform=v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]),
+)
+batch_size = 64
 
-w = torch.tensor(2.0, requires_grad=True)
-x = torch.tensor(3.0)
+# Create data loaders.
+train_dataloader = DataLoader(training_data, batch_size=batch_size)
+test_dataloader = DataLoader(test_data, batch_size=batch_size)
 
-y = w * x
-print("w",w) #
-print("x",x)
-print("y",y)
-y.backward()
-print("back propagation",w.grad)
+for X, y in test_dataloader:
+    print(f"Shape of X [N, C, H, W]: {X.shape}")
+    print(f"Shape of y: {y.shape} {y.dtype}")
+    break
+device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
+print(f"Using {device} device")
 
-import torch.nn as nn
-
-class XorNet(nn.Module):
+# Define model
+class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
-        self.layer1 = nn.Linear(2,4)
-        self.relu = nn.ReLU()
-        self.layer2 = nn.Linear(4,1)
+        self.flatten = nn.Flatten()
+        self.linear_relu_stack = nn.Sequential(
+            nn.Linear(28*28, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 10)
+        )
 
     def forward(self, x):
-         x = self.layer1(x)
-         x = self.relu(x)
-         x = self.layer2(x)
-         output = x
-         return output
-model = XorNet()
-X_tensor = torch.tensor(X, dtype=torch.float)
-output = model(X_tensor)
-print(output)
-print(output.shape)
+        x = self.flatten(x)
+        logits = self.linear_relu_stack(x)
+        return logits
+
+model = NeuralNetwork().to(device)
+print(model)
+
+loss_fn = nn.CrossEntropyLoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+
+def train(dataloader, model, loss_fn, optimizer):
+    size = len(dataloader.dataset)
+    model.train()
+    for batch, (X, y) in enumerate(dataloader):
+        X, y = X.to(device), y.to(device)
+
+        # Compute prediction error
+        pred = model(X)
+        loss = loss_fn(pred, y)
+
+        # Backpropagation
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+
+        if batch % 100 == 0:
+            loss, current = loss.item(), (batch + 1) * len(X)
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+def test(dataloader, model, loss_fn):
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
+    model.eval()
+    test_loss, correct = 0, 0
+    with torch.no_grad():
+        for X, y in dataloader:
+            X, y = X.to(device), y.to(device)
+            pred = model(X)
+            test_loss += loss_fn(pred, y).item()
+            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+    test_loss /= num_batches
+    correct /= size
+    print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+epochs = 5
+for t in range(epochs):
+    print(f"Epoch {t+1}\n-------------------------------")
+    train(train_dataloader, model, loss_fn, optimizer)
+    test(test_dataloader, model, loss_fn)
+print("Done!")
+torch.save(model.state_dict(), "model.pth")
+print("Saved PyTorch Model State to model.pth")
+model = NeuralNetwork().to(device)
+model.load_state_dict(torch.load("model.pth", weights_only=True))
+classes = [
+    "T-shirt/top",
+    "Trouser",
+    "Pullover",
+    "Dress",
+    "Coat",
+    "Sandal",
+    "Shirt",
+    "Sneaker",
+    "Bag",
+    "Ankle boot",
+]
+
+model.eval()
+x, y = test_data[0][0], test_data[0][1]
+with torch.no_grad():
+    x = x.to(device)
+    pred = model(x)
+    predicted, actual = classes[pred[0].argmax(0)], classes[y]
+    print(f'Predicted: "{predicted}", Actual: "{actual}"')
